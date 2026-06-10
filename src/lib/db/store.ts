@@ -82,6 +82,7 @@ export interface Store {
   getProposalByToken(token: string): Promise<Proposal | null>;
   getProposalById(id: string): Promise<Proposal | null>;
   getProposalForJob(jobId: string): Promise<Proposal | null>;
+  markProposalViewed(token: string): Promise<void>;
   acceptProposal(token: string, signatureName: string): Promise<Proposal | null>;
 
   createInvoice(input: NewInvoice): Promise<Invoice>;

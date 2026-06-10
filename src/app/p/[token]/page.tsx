@@ -14,6 +14,11 @@ export default async function ProposalPage({ params }: { params: Promise<{ token
   const proposal = await store.getProposalByToken(token);
   if (!proposal) notFound();
 
+  // Open-tracking: flip sent -> viewed the first time the homeowner opens this link.
+  if (proposal.status === "sent") {
+    await store.markProposalViewed(token);
+  }
+
   const [job, estimate, contractor] = await Promise.all([
     store.getJob(proposal.jobId),
     store.getEstimate(proposal.estimateId),

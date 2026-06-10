@@ -91,6 +91,8 @@ export interface Proposal {
   scopeCopy: ScopeCopy | null;
   signatureName: string | null;
   acceptedAt: string | null;
+  /** First time the homeowner opened the proposal link (open-tracking). */
+  viewedAt: string | null;
   createdAt: string;
 }
 

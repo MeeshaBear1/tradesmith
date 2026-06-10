@@ -195,6 +195,7 @@ class MemoryStore implements Store {
       status: "sent",
       signatureName: null,
       acceptedAt: null,
+      viewedAt: null,
       createdAt: now(),
       ...input,
     };
@@ -213,6 +214,13 @@ class MemoryStore implements Store {
         .filter((p) => p.jobId === jobId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null
     );
+  }
+  async markProposalViewed(token: string) {
+    const p = await this.getProposalByToken(token);
+    if (p && p.status === "sent") {
+      p.status = "viewed";
+      p.viewedAt = now();
+    }
   }
   async acceptProposal(token: string, signatureName: string) {
     const p = await this.getProposalByToken(token);

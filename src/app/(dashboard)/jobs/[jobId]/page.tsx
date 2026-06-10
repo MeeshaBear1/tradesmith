@@ -85,6 +85,18 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
           {proposal ? (
             <div className="space-y-4 text-sm">
               <Detail k="Status" v={proposal.status} />
+              {proposal.status === "viewed" && (
+                <div className="rounded-lg p-3" style={{ background: "var(--warn-soft)", color: "var(--warn)" }}>
+                  <span className="font-semibold">Homeowner opened this</span>
+                  {proposal.viewedAt ? ` · ${new Date(proposal.viewedAt).toLocaleString()}` : ""} — good time to
+                  follow up.
+                </div>
+              )}
+              {proposal.status === "accepted" && (
+                <div className="rounded-lg p-3" style={{ background: "var(--ok-soft)", color: "var(--ok)" }}>
+                  Accepted{proposal.signatureName ? ` by ${proposal.signatureName}` : ""}.
+                </div>
+              )}
               <div className="flex flex-wrap gap-2">
                 <a className="btn btn-ghost" href={`/p/${proposal.publicToken}`} target="_blank" rel="noreferrer">
                   Open proposal ↗

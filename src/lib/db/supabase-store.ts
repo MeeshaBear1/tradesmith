@@ -94,6 +94,7 @@ const toProposal = (r: any): Proposal => ({
   scopeCopy: r.scope_copy,
   signatureName: r.signature_name,
   acceptedAt: r.accepted_at,
+  viewedAt: r.viewed_at ?? null,
   createdAt: r.created_at,
 });
 const toInvoice = (r: any): Invoice => ({
@@ -375,6 +376,14 @@ export class SupabaseStore implements Store {
       .limit(1)
       .maybeSingle();
     return one(data, toProposal);
+  }
+  async markProposalViewed(token: string) {
+    // First open only: flip sent -> viewed and stamp the time.
+    await this.db
+      .from("proposals")
+      .update({ status: "viewed", viewed_at: new Date().toISOString() })
+      .eq("public_token", token)
+      .eq("status", "sent");
   }
   async acceptProposal(token: string, signatureName: string) {
     // Idempotent: only stamp a signature when not already accepted.
