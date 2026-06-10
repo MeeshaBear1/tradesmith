@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/money";
 import { QrCode } from "@/components/share/QrCode";
+import { CameraCapture } from "@/components/jobs/CameraCapture";
 import { VERTICAL_LIST, getVertical } from "@/lib/verticals/registry";
 import type { MeasureField, VerticalConfig } from "@/lib/verticals/types";
 import type {
@@ -353,8 +354,13 @@ function MeasureStep({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={measurement.satelliteImageUrl} alt="Satellite view" className="aspect-square w-full rounded-xl border border-[var(--line)] object-cover" />
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-xl border border-dashed border-[var(--line)] bg-[var(--paper)] p-6 text-center text-sm text-[var(--muted)]">
-            No satellite imagery (demo / no Mapbox key). Enter the footprint and pitch manually — pricing still works.
+          <div>
+            <CameraCapture
+              onCapture={() => {}}
+              label="Snap the roof from the truck"
+              hint="No satellite here — add a site photo, then enter the measurements"
+            />
+            <p className="mt-2 text-xs text-[var(--muted)]">Pricing works either way — the photo is for your on-site reference.</p>
           </div>
         )}
         <div className="grid grid-cols-2 gap-3">
