@@ -3,6 +3,9 @@ import { requireContractor } from "@/lib/auth/session";
 import { getStore } from "@/lib/db/store";
 import { getVertical } from "@/lib/verticals/registry";
 import { StatusBadge } from "@/components/badges";
+import { computeDashboardMetrics } from "@/lib/metrics";
+import type { JobStatus } from "@/lib/db/types";
+import { formatCents } from "@/lib/money";
 
 function timeAgo(iso: string): string {
   const days = Math.round((Date.now() - new Date(iso).getTime()) / 86_400_000);
@@ -15,20 +18,41 @@ export default async function DashboardPage() {
   const contractor = await requireContractor();
   const store = await getStore();
   const jobs = await store.listJobs(contractor.id);
+  const estimates = await Promise.all(jobs.map((j) => store.getLatestEstimate(j.id)));
+  const rows = jobs.map((j, i) => ({ status: j.status, estTotalCents: estimates[i]?.totalCents ?? null }));
+  const m = computeDashboardMetrics(rows);
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Jobs</h1>
-          <p className="text-sm text-[var(--muted)]">{jobs.length} total</p>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-[var(--muted)]">
+            {m.totalJobs} {m.totalJobs === 1 ? "job" : "jobs"} · {m.byStage.paid} paid
+          </p>
         </div>
-        <Link href="/jobs/new" className="btn btn-primary">
+        <Link href="/jobs/new" className="btn btn-primary shrink-0">
           + New job
         </Link>
       </div>
 
-      <div className="card mt-6 divide-y divide-[var(--line)]">
+      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Metric label="Pipeline value" value={formatCents(m.pipelineValueCents)} sub="open jobs" />
+        <Metric label="Signed" value={formatCents(m.signedValueCents)} sub={`${m.wonCount} won`} accent />
+        <Metric label="Deposits in" value={formatCents(m.depositsCollectedCents)} sub="collected" />
+        <Metric label="Close rate" value={`${m.closeRatePct}%`} sub={`avg ${formatCents(m.avgJobCents)}`} />
+      </div>
+
+      {m.totalJobs > 0 && <StageFunnel byStage={m.byStage} total={m.totalJobs} />}
+
+      <div className="mt-7 flex items-center justify-between">
+        <h2 className="font-semibold">Recent jobs</h2>
+        <Link href="/pipeline" className="text-sm font-medium text-[var(--brand)] hover:underline">
+          Pipeline view →
+        </Link>
+      </div>
+
+      <div className="card mt-2 divide-y divide-[var(--line)]">
         {jobs.length === 0 && (
           <div className="p-10 text-center text-sm text-[var(--muted)]">
             No jobs yet. Start one from an address.
@@ -53,6 +77,61 @@ export default async function DashboardPage() {
             </div>
           </Link>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value, sub, accent }: { label: string; value: string; sub: string; accent?: boolean }) {
+  return (
+    <div className="card p-4" style={accent ? { borderColor: "var(--brand)", boxShadow: "0 0 0 1px var(--brand)" } : undefined}>
+      <div className="label">{label}</div>
+      <div className="display mt-1 text-2xl tabular-nums" style={accent ? { color: "var(--brand)" } : undefined}>
+        {value}
+      </div>
+      <div className="spec mt-0.5">{sub}</div>
+    </div>
+  );
+}
+
+const FUNNEL: { key: JobStatus; label: string }[] = [
+  { key: "new", label: "New" },
+  { key: "measured", label: "Measured" },
+  { key: "estimated", label: "Estimated" },
+  { key: "proposed", label: "Proposed" },
+  { key: "accepted", label: "Accepted" },
+  { key: "invoiced", label: "Invoiced" },
+  { key: "paid", label: "Paid" },
+];
+
+function StageFunnel({ byStage, total }: { byStage: Record<JobStatus, number>; total: number }) {
+  return (
+    <div className="card mt-3 p-4">
+      <div className="label mb-3">Pipeline by stage</div>
+      <div className="grid grid-cols-7 gap-1.5">
+        {FUNNEL.map((s) => {
+          const n = byStage[s.key];
+          const pct = total ? Math.round((n / total) * 100) : 0;
+          return (
+            <div key={s.key} className="text-center">
+              <div className="flex h-16 items-end justify-center">
+                <div
+                  className="w-full rounded-t"
+                  style={{
+                    height: `${Math.max(6, pct)}%`,
+                    background: n ? "var(--brand)" : "var(--line)",
+                    opacity: n ? 1 : 0.5,
+                  }}
+                  title={`${n} ${s.label}`}
+                />
+              </div>
+              <div className="mt-1 text-sm font-semibold tabular-nums">{n}</div>
+              <div className="spec hidden sm:block" style={{ fontSize: "0.6rem" }}>
+                {s.label}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

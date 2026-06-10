@@ -4,6 +4,9 @@ import { requireContractor } from "@/lib/auth/session";
 import { getStore } from "@/lib/db/store";
 import { StatusBadge } from "@/components/badges";
 import { JobActions } from "@/components/jobs/JobActions";
+import { MaterialsList } from "@/components/jobs/MaterialsList";
+import { QrCode } from "@/components/share/QrCode";
+import { env } from "@/config/env";
 import { formatCents } from "@/lib/money";
 
 export default async function JobDetailPage({ params }: { params: Promise<{ jobId: string }> }) {
@@ -72,9 +75,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
           )}
         </Section>
 
+        {estimate && selectedTier && (
+          <Section title="Materials & supply list">
+            <MaterialsList tier={selectedTier} />
+          </Section>
+        )}
+
         <Section title="Proposal & payment">
           {proposal ? (
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
               <Detail k="Status" v={proposal.status} />
               <div className="flex flex-wrap gap-2">
                 <a className="btn btn-ghost" href={`/p/${proposal.publicToken}`} target="_blank" rel="noreferrer">
@@ -85,6 +94,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
                     Open pay page ↗
                   </a>
                 )}
+              </div>
+              <div className="flex flex-col items-center gap-1 rounded-lg border border-[var(--line)] bg-[var(--paper)] p-4 sm:flex-row sm:items-center sm:gap-4">
+                <QrCode value={`${env.appUrl}/p/${proposal.publicToken}`} size={132} />
+                <div className="text-center sm:text-left">
+                  <div className="font-semibold">Show it on-site</div>
+                  <p className="text-xs text-[var(--muted)]">
+                    Have the homeowner scan this to open their proposal on their own phone.
+                  </p>
+                </div>
               </div>
             </div>
           ) : (

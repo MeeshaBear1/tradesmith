@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Tier } from "@/lib/takeoff/types";
+import { SignaturePad } from "@/components/proposal/SignaturePad";
 
 export function AcceptForm({
   token,
@@ -61,12 +62,15 @@ export function AcceptForm({
     <div className="card p-6">
       <h3 className="text-lg font-semibold">Accept this proposal</h3>
       <p className="mt-1 text-sm text-[var(--muted)]">
-        Type your full name to e-sign. You&apos;ll then place a deposit to lock in your spot.
+        Sign below and type your full name to e-sign. You&apos;ll then place a deposit to lock in your spot.
       </p>
+      <div className="mt-4">
+        <SignaturePad onChange={() => {}} />
+      </div>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <input
           className="input"
-          placeholder="Your full name"
+          placeholder="Type your full name to confirm"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />

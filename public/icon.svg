@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tradesmith">
+  <rect width="512" height="512" rx="112" fill="#15181c"/>
+  <g fill="#ea4e1c">
+    <!-- anvil face -->
+    <rect x="132" y="178" width="208" height="54" rx="10"/>
+    <!-- horn -->
+    <polygon points="338,178 412,205 338,232"/>
+    <!-- waist -->
+    <rect x="200" y="232" width="112" height="72"/>
+    <!-- flared base -->
+    <polygon points="152,304 360,304 388,348 124,348"/>
+  </g>
+</svg>

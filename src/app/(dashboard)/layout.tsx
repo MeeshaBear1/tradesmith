@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireContractor } from "@/lib/auth/session";
 import { integrationStatus } from "@/config/env";
 import { IntegrationBadges } from "@/components/badges";
+import { BottomNav } from "@/components/nav/BottomNav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const contractor = await requireContractor();
@@ -34,6 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
           <nav className="mt-8 flex flex-col gap-1">
             <NavLink href="/dashboard" label="Jobs" />
+            <NavLink href="/pipeline" label="Pipeline" />
             <NavLink href="/jobs/new" label="New job" accent />
             <NavLink href="/inbox" label="Feedback inbox" />
             <NavLink href="/settings" label="Settings" />
@@ -55,11 +57,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             New job
           </Link>
         </header>
-        <main className="px-6 py-8">{children}</main>
-        <footer className="border-t border-[var(--line)] px-6 py-4">
+        <main className="px-4 py-6 pb-24 sm:px-6 sm:py-8 md:pb-8">{children}</main>
+        <footer className="border-t border-[var(--line)] px-6 py-4 pb-24 md:pb-4">
           <IntegrationBadges status={status} />
         </footer>
       </div>
+
+      <BottomNav />
     </div>
   );
 }

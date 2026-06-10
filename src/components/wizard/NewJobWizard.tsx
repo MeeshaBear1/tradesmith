@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/money";
+import { QrCode } from "@/components/share/QrCode";
 import { VERTICAL_LIST, getVertical } from "@/lib/verticals/registry";
 import type { MeasureField, VerticalConfig } from "@/lib/verticals/types";
 import type {
@@ -239,6 +240,18 @@ export function NewJobWizard() {
             card payment and financing.
           </p>
           <ShareLink token={proposalToken} />
+          <div className="mt-5 flex flex-col items-center gap-3 rounded-lg border border-[var(--line)] bg-[var(--paper)] p-4 sm:flex-row sm:gap-5">
+            <QrCode
+              value={`${typeof window !== "undefined" ? window.location.origin : ""}/p/${proposalToken}`}
+              size={140}
+            />
+            <div className="text-center sm:text-left">
+              <div className="font-semibold">Standing in the driveway?</div>
+              <p className="text-sm text-[var(--muted)]">
+                Have them scan this to open the proposal on their phone and sign right there.
+              </p>
+            </div>
+          </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <a className="btn btn-primary" href={`/p/${proposalToken}`} target="_blank" rel="noreferrer">Open proposal ↗</a>
             <button className="btn btn-ghost" onClick={() => router.push("/dashboard")}>Back to jobs</button>
