@@ -1,26 +1,239 @@
 @import "tailwindcss";
 
+/* Tradesmith — "Cold Steel & Forge Fire". Semantic token names are kept stable;
+   only hex values change so every screen reskins at once. See docs/art-direction.md. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Neutrals — COOL (the break from the warm-cream sibling family) */
+  --paper: #f0f2f4; /* Cold Concrete */
+  --surface: #ffffff;
+  --surface-sunken: #e9ecef;
+  --ink: #1a1d22; /* Forged Graphite */
+  --muted: #677079; /* cool slate */
+  --line: #e2e6ea;
+
+  /* Brand — Forge Fire (the spark; used sparingly) */
+  --brand: #ea4e1c; /* Forge Orange */
+  --brand-strong: #c73f12;
+  --brand-soft: #fceae1;
+
+  /* Trust — Blueprint Steel (credibility without leaning on orange) */
+  --trust: #34566b;
+  --trust-soft: #eaf0f4;
+
+  /* Dark/steel ramp */
+  --graphite-900: #15181c;
+  --graphite-800: #1a1d22;
+  --graphite-700: #23272e;
+  --graphite-600: #2e333b;
+
+  /* Status */
+  --ok: #15803d;
+  --ok-soft: #e9f6ee;
+  --warn: #b45309;
+  --warn-soft: #fbf3e4;
+  --danger: #b91c1c;
+  --danger-soft: #fbecec;
+
+  /* Elevation — warm-neutral shadow on a cool base */
+  --shadow-xs: 0 1px 2px rgba(20, 24, 28, 0.06);
+  --shadow-sm: 0 1px 2px rgba(20, 24, 28, 0.06), 0 2px 6px rgba(20, 24, 28, 0.06);
+  --shadow-md: 0 4px 12px rgba(20, 24, 28, 0.08), 0 2px 4px rgba(20, 24, 28, 0.06);
+  --shadow-lg: 0 12px 32px rgba(20, 24, 28, 0.12), 0 4px 8px rgba(20, 24, 28, 0.06);
+  --shadow-forge: 0 6px 20px rgba(234, 78, 28, 0.28);
+
+  /* Radius — rectilinear / forged */
+  --radius-sm: 8px;
+  --radius-btn: 10px;
+  --radius-card: 14px;
+  --radius-hero: 20px;
+
+  /* Fonts */
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-hanken);
+  --font-mono: var(--font-jbmono);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-trust: var(--trust);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sm);
+  }
+  .card-hero {
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-hero);
+  }
+  .card-sunken {
+    background: var(--surface-sunken);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-btn);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.05rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--brand-strong);
+    box-shadow: var(--shadow-forge);
+    transform: translateY(-1px);
+  }
+  .btn-trust {
+    background: var(--trust);
+    color: #fff;
+  }
+  .btn-trust:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+  .btn-dark {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn-dark:hover:not(:disabled) {
+    filter: brightness(1.25);
+  }
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--paper);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    letter-spacing: 0.01em;
+  }
+  .input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .input:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: -1px;
+  }
+  .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  /* Stamped spec label — the "quietly smart / measured" texture */
+  .spec {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  /* Display type — Archivo, for headlines / wordmark / big numbers */
+  .display {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  /* Tabular money — columns never reflow */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Signature texture: hairline blueprint grid for heroes + empty states
+     (never a dashed gray box) */
+  .grid-blueprint {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(to right, rgba(52, 86, 107, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(52, 86, 107, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  /* Blueprint grid on the dark/graphite ground (hero + dark sections) */
+  .grid-blueprint-dark {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+}
+
+/* Scroll-reveal: fade + rise, ease-out-expo. Honors reduced-motion. */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Print / save-as-PDF: hide interactive chrome, keep brand colors. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

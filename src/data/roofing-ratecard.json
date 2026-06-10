@@ -1,0 +1,42 @@
+{
+  "version": "2026.06",
+  "region": "US-default",
+  "regionalFactor": 1.0,
+  "wasteFactors": { "simple": 1.1, "moderate": 1.15, "complex": 1.22 },
+  "materials": {
+    "shingles_3tab": { "unit": "bundle", "perSquare": 3, "costCents": 3800, "desc": "3-tab 25yr shingle" },
+    "shingles_arch": { "unit": "bundle", "perSquare": 3, "costCents": 4200, "desc": "Architectural 30yr laminate shingle" },
+    "shingles_premium": { "unit": "bundle", "perSquare": 4, "costCents": 6200, "desc": "Designer premium shingle" },
+    "underlayment_felt": { "unit": "square", "perSquare": 1, "costCents": 900, "desc": "#15 felt underlayment" },
+    "underlayment_synth": { "unit": "square", "perSquare": 1, "costCents": 1600, "desc": "Synthetic underlayment" },
+    "starter_strip": { "unit": "lf", "basis": "eaveRakeLf", "costCents": 85, "desc": "Starter strip (eave + rake)" },
+    "ridge_cap": { "unit": "lf", "basis": "ridgeHipLf", "costCents": 240, "desc": "Hip & ridge cap shingle" },
+    "drip_edge": { "unit": "lf", "basis": "dripEdgeLf", "costCents": 165, "desc": "Aluminum drip edge" },
+    "ice_water": { "unit": "lf", "basis": "iceWaterLf", "costCents": 190, "desc": "Ice & water shield membrane" },
+    "roofing_nails": { "unit": "square", "perSquare": 1, "costCents": 450, "desc": "Coil roofing nails" },
+    "pipe_boots": { "unit": "each", "basis": "penetrationCount", "costCents": 1400, "desc": "Pipe boot flashing" },
+    "ridge_vent": { "unit": "lf", "basis": "ridgeLf", "costCents": 450, "desc": "Ridge vent" }
+  },
+  "teardown": {
+    "tearoff_labor": { "unit": "square", "costCents": 5500, "perLayerMultiplier": 0.7, "desc": "Tear-off existing roof" },
+    "dumpster": { "unit": "each", "costCents": 47500, "squaresPerDumpster": 25, "desc": "30yd dumpster + haul-away" }
+  },
+  "labor": {
+    "installPerSquareCents": { "simple": 11000, "moderate": 14500, "complex": 19500 },
+    "steepThresholdX12": 8,
+    "steepPerSquareAddCents": 3500,
+    "twoStoryAddPerSquareCents": 1800
+  },
+  "markupStack": [
+    { "key": "general_conditions", "label": "General conditions", "rate": 0.08 },
+    { "key": "overhead_profit", "label": "Overhead & profit", "rate": 0.1 },
+    { "key": "contingency", "label": "Contingency", "rate": 0.05 },
+    { "key": "escalation", "label": "Escalation", "rate": 0.03 },
+    { "key": "bonds_insurance", "label": "Bonds & insurance", "rate": 0.02 }
+  ],
+  "tiers": {
+    "good": { "label": "Good", "shingle": "shingles_3tab", "underlayment": "underlayment_felt", "iceWaterScope": "eaves", "ridgeVent": false },
+    "better": { "label": "Better", "shingle": "shingles_arch", "underlayment": "underlayment_synth", "iceWaterScope": "eaves_valleys", "ridgeVent": true },
+    "best": { "label": "Best", "shingle": "shingles_premium", "underlayment": "underlayment_synth", "iceWaterScope": "full", "ridgeVent": true }
+  }
+}
