@@ -48,14 +48,28 @@ single-operator demo. Add Supabase when you want data to persist.
 ## 3. Supabase setup (when you add it)
 
 1. Create a project at supabase.com.
-2. Apply the schema + seed:
-   ```powershell
-   # option A: Supabase SQL editor — paste supabase/migrations/0001_init.sql then supabase/seed.sql
-   # option B: supabase CLI
-   supabase link --project-ref <ref>
-   supabase db push           # applies migrations/0001_init.sql
-   # then run seed.sql in the SQL editor
+2. Apply **all five migrations** in order, then the seed:
+
+   **Option A — Supabase SQL editor (paste each file in order):**
    ```
+   supabase/migrations/0001_init.sql            — core tables + RLS
+   supabase/migrations/0002_takeoff_render.sql  — render columns + storage bucket
+   supabase/migrations/0003_contractor_auth.sql — password_hash + email index
+   supabase/migrations/0004_proposal_viewed.sql — proposal open-tracking (viewed_at)
+   supabase/migrations/0005_demo_seed.sql       — demo tenant seed
+   supabase/seed.sql                            — demo jobs + contractor data
+   ```
+
+   **Option B — Supabase CLI:**
+   ```powershell
+   supabase link --project-ref <ref>
+   supabase db push   # applies all migrations in supabase/migrations/ in order
+   # then paste supabase/seed.sql in the SQL editor
+   ```
+
+   > ⚠️ **All five migrations are required.** Applying only `0001` (as older docs stated)
+   > will break proposal open-tracking, AI render, and contractor auth login at runtime.
+
 3. Copy the URL + anon + service-role keys into Vercel env vars.
 
 ## 4. Stripe webhook (when you add Stripe)
