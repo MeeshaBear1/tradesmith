@@ -133,7 +133,6 @@ export async function analyzeRoofImage(
     const res = await client.messages.create({
       model: "claude-opus-4-8",
       max_tokens: 1500,
-      temperature: 0,
       system: SYSTEM_PROMPT,
       tools: [REPORT_ROOF_TOOL],
       tool_choice: { type: "tool", name: "report_roof" },

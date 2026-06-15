@@ -92,7 +92,6 @@ export async function generateScopeCopy(i: ScopeInputs): Promise<ScopeCopy> {
     const res = await client.messages.create({
       model: "claude-opus-4-8",
       max_tokens: 1200,
-      temperature: 0.6,
       tools: [TOOL],
       tool_choice: { type: "tool", name: "write_scope" },
       messages: [
