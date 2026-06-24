@@ -155,7 +155,6 @@ export async function analyzeScopePhotos(photos: ScopePhoto[], ctx: ScopeContext
     const res = await client.messages.create({
       model: "claude-opus-4-8",
       max_tokens: 2000,
-      temperature: 0,
       system: SYSTEM_PROMPT,
       tools: [REPORT_SCOPE_TOOL],
       tool_choice: { type: "tool", name: "report_scope" },
