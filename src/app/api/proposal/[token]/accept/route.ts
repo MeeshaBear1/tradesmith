@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStore } from "@/lib/db/store";
 import { badRequest, notFoundJson, readJson } from "@/lib/http";
-import type { Tier } from "@/lib/takeoff/types";
-
-const DEPOSIT_PCT = 0.35;
-const TIERS: Tier[] = ["good", "better", "best"];
+import { depositCents, deriveAmountCents, resolveChosenTier } from "@/lib/proposals/deposit";
 
 /** Public (no auth) — homeowner accepts + types their name, which mints a deposit invoice. */
 export async function POST(req: Request, ctx: { params: Promise<{ token: string }> }) {
@@ -32,18 +29,14 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
 
   // The homeowner's chosen tier governs the deposit — but only if it's a real,
   // allow-listed tier that exists in this estimate. Otherwise keep what was sent.
-  const requested = body?.selectedTier;
-  const chosenTier: Tier =
-    requested && TIERS.includes(requested as Tier) && estimate?.tiers.some((t) => t.tier === requested)
-      ? (requested as Tier)
-      : (estimate?.selectedTier ?? "better");
+  const chosenTier = resolveChosenTier(body?.selectedTier, estimate?.tiers, estimate?.selectedTier ?? "better");
 
   if (estimate && chosenTier !== estimate.selectedTier) {
     await store.setSelectedTier(estimate.id, chosenTier);
   }
 
   // Re-derive the amount server-side from the chosen tier — never trust a client amount.
-  const total = estimate?.tiers.find((t) => t.tier === chosenTier)?.totalCents ?? estimate?.totalCents ?? 0;
+  const total = deriveAmountCents(estimate?.tiers, chosenTier, estimate?.totalCents ?? 0);
 
   let invoice = await store.getInvoiceForProposal(proposal.id);
   if (!invoice) {
@@ -52,7 +45,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
       contractorId: proposal.contractorId,
       proposalId: proposal.id,
       amountCents: total,
-      depositCents: Math.round(total * DEPOSIT_PCT),
+      depositCents: depositCents(total),
       type: "deposit",
     });
   }
