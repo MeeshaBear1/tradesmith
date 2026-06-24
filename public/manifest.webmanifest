@@ -2,7 +2,7 @@
   "name": "Tradesmith",
   "short_name": "Tradesmith",
   "description": "Quote it from the truck, get paid before you pack up.",
-  "start_url": "/dashboard",
+  "start_url": "/today",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -13,7 +13,8 @@
     { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "New job", "short_name": "New job", "url": "/jobs/new" },
+    { "name": "Quote from a photo", "short_name": "Quote", "url": "/today/quote" },
+    { "name": "Today", "short_name": "Today", "url": "/today" },
     { "name": "Pipeline", "short_name": "Pipeline", "url": "/pipeline" }
   ]
 }

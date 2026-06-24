@@ -34,9 +34,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </Link>
 
           <nav className="mt-8 flex flex-col gap-1">
+            <NavLink href="/today" label="Today" />
             <NavLink href="/dashboard" label="Jobs" />
             <NavLink href="/pipeline" label="Pipeline" />
-            <NavLink href="/jobs/new" label="New job" accent />
+            <NavLink href="/today/quote" label="Quote from a photo" accent />
             <NavLink href="/inbox" label="Feedback inbox" />
             <NavLink href="/settings" label="Settings" />
           </nav>
