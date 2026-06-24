@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getStore } from "@/lib/db/store";
 import { setContractorCookie } from "@/lib/auth/session";
 import { hashPassword } from "@/lib/auth/password";
+import { sendSignupWelcome } from "@/lib/email/send";
 import { badRequest, readJson } from "@/lib/http";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -37,5 +38,11 @@ export async function POST(req: Request) {
     passwordHash: hashPassword(password),
   });
   await setContractorCookie(contractor.id);
+
+  // Welcome email after the response — fail-open, skipped without a mail key.
+  if (contractor.email) {
+    const email = contractor.email;
+    after(() => sendSignupWelcome(email, contractor.name).catch(() => {}));
+  }
   return NextResponse.json({ ok: true });
 }

@@ -3,6 +3,7 @@ import { getContractorId } from "@/lib/auth/session";
 import { getStore } from "@/lib/db/store";
 import { generateScopeCopy, genericScopeCopy } from "@/lib/ai/scope";
 import { generateRenderForJob } from "@/lib/render/generate";
+import { sendProposalToHomeowner } from "@/lib/email/send";
 import { badRequest, readJson, unauthorized } from "@/lib/http";
 import type { ScopeCopy } from "@/lib/db/types";
 import type { Tier } from "@/lib/takeoff/types";
@@ -71,6 +72,18 @@ export async function POST(req: Request) {
     scopeCopy,
   });
   await store.updateJobStatus(job.id, "proposed");
+
+  // Email the proposal link to the homeowner (after the response, fail-open).
+  if (job.homeownerEmail) {
+    const to = job.homeownerEmail;
+    after(() =>
+      sendProposalToHomeowner(to, {
+        companyName: contractor.name,
+        homeownerName: job.homeownerName,
+        token: proposal.publicToken,
+      }).catch(() => {}),
+    );
+  }
 
   // Fire the AI "after" render AFTER the response (never in the quoting loop).
   // No-op in demo/keyless mode; the swatch board is the always-on fallback.

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getContractorId } from "@/lib/auth/session";
 import { getStore } from "@/lib/db/store";
-import { badRequest, readJson, unauthorized } from "@/lib/http";
+import { checkCostLimit } from "@/lib/ratelimit";
+import { badRequest, readJson, tooManyRequests, unauthorized } from "@/lib/http";
 import { generateRenderForJob } from "@/lib/render/generate";
 import type { Tier } from "@/lib/takeoff/types";
 
@@ -15,6 +16,9 @@ const TIERS: Tier[] = ["good", "better", "best"];
 export async function POST(req: Request) {
   const contractorId = await getContractorId();
   if (!contractorId) return unauthorized();
+
+  const limit = checkCostLimit("render", contractorId);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSec);
 
   const body = await readJson<{ jobId: string; tier?: string; colorName?: string }>(req);
   if (!body?.jobId) return badRequest("missing_jobId");

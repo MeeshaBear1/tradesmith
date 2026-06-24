@@ -1,8 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import type Stripe from "stripe";
 import { env } from "@/config/env";
 import { getStore } from "@/lib/db/store";
 import { getStripe } from "@/lib/stripe/client";
+import { sendPaymentReceipt } from "@/lib/email/send";
+import { reportError } from "@/lib/observability";
 
 /** Stripe webhook → records the payment idempotently and marks the invoice paid. */
 export async function POST(req: Request) {
@@ -16,7 +18,7 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(raw, sig ?? "", env.stripeWebhookSecret);
   } catch (err) {
-    console.error("webhook signature verification failed:", err);
+    reportError(err, { where: "stripe.webhook.signature" });
     return NextResponse.json({ error: "invalid_signature" }, { status: 400 });
   }
 
@@ -39,6 +41,21 @@ export async function POST(req: Request) {
       });
       await store.markInvoicePaid(invoice.id);
       await store.updateJobStatus(invoice.jobId, "paid");
+
+      // Receipt to the homeowner after the response — fail-open, skipped without a mail key.
+      const job = await store.getJob(invoice.jobId);
+      const contractor = await store.getContractor(invoice.contractorId);
+      if (job?.homeownerEmail && contractor) {
+        const to = job.homeownerEmail;
+        const amountCents = pi.amount_received ?? pi.amount;
+        after(() =>
+          sendPaymentReceipt(to, {
+            companyName: contractor.name,
+            amountCents,
+            address: job.address,
+          }).catch(() => {}),
+        );
+      }
     }
   }
 

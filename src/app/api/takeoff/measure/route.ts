@@ -3,12 +3,16 @@ import { getContractorId } from "@/lib/auth/session";
 import { getStore } from "@/lib/db/store";
 import { getEngine } from "@/lib/takeoff/registry";
 import { sanitizeDetailOverride } from "@/lib/roofing/sanitize";
-import { badRequest, readJson, unauthorized } from "@/lib/http";
+import { checkCostLimit } from "@/lib/ratelimit";
+import { badRequest, readJson, tooManyRequests, unauthorized } from "@/lib/http";
 import type { RoofingDetail } from "@/lib/takeoff/types";
 
 export async function POST(req: Request) {
   const contractorId = await getContractorId();
   if (!contractorId) return unauthorized();
+
+  const limit = checkCostLimit("aiMeasure", contractorId);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSec);
 
   const body = await readJson<{ jobId: string; manual?: Partial<RoofingDetail> }>(req);
   if (!body?.jobId) return badRequest("missing_jobId");

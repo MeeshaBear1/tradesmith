@@ -17,6 +17,11 @@ export const env = {
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
   // Image-to-image render (Google Gemini 2.5 Flash Image, "Nano Banana"). Optional.
   geminiKey: process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY ?? "",
+  // Transactional email (Resend). Optional — sends are fail-open and skipped without it.
+  resendKey: process.env.RESEND_API_KEY ?? "",
+  emailFrom: process.env.EMAIL_FROM ?? "Tradesmith <onboarding@resend.dev>",
+  // Error reporting (Sentry-compatible DSN). Optional — no-op until set.
+  sentryDsn: process.env.SENTRY_DSN ?? "",
   demoMode: process.env.DEMO_MODE === "1" || process.env.NODE_ENV !== "production",
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   sessionSecret: process.env.SESSION_SECRET ?? "tradesmith-dev-secret-change-me",
@@ -35,7 +40,7 @@ if (
   );
 }
 
-export type Service = "supabase" | "anthropic" | "mapbox" | "stripe" | "render";
+export type Service = "supabase" | "anthropic" | "mapbox" | "stripe" | "render" | "email";
 
 export function hasKey(service: Service): boolean {
   switch (service) {
@@ -52,6 +57,8 @@ export function hasKey(service: Service): boolean {
     case "render":
       // Generated renders also need somewhere to store the PNG, so require Storage.
       return Boolean(env.geminiKey && env.supabaseUrl && env.supabaseServiceKey);
+    case "email":
+      return Boolean(env.resendKey);
   }
 }
 
@@ -63,6 +70,7 @@ export function integrationStatus() {
     mapbox: hasKey("mapbox"),
     stripe: hasKey("stripe"),
     render: hasKey("render"),
+    email: hasKey("email"),
     demoMode: env.demoMode,
   };
 }

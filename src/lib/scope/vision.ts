@@ -4,6 +4,7 @@ import { templateScope } from "@/lib/scope/catalog";
 import { confidenceBand, isCurrentState, isRoomType } from "@/lib/scope/types";
 import type { CurrentState, RoomType, ScopeLineSeed, ScopeResult } from "@/lib/scope/types";
 import { clampCents } from "@/lib/verticals/rate-overrides";
+import { reportError } from "@/lib/observability";
 import type { ItemCategory } from "@/lib/takeoff/types";
 
 export interface ScopePhoto {
@@ -181,7 +182,7 @@ export async function analyzeScopePhotos(photos: ScopePhoto[], ctx: ScopeContext
     if (!toolUse) return templateScope(roomType, currentState, floorSqft);
     return normalizeReport(toolUse.input as unknown as ReportScope, { roomType, currentState, floorSqft });
   } catch (err) {
-    console.error("analyzeScopePhotos failed:", err);
+    reportError(err, { where: "analyzeScopePhotos", roomType, currentState });
     return templateScope(roomType, currentState, floorSqft);
   }
 }
