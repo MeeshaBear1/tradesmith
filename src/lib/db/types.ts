@@ -67,6 +67,19 @@ export interface ScopeCopy {
   sections: { title: string; body: string }[];
 }
 
+/** Human-facing context captured when an estimate is built from a photo scope. */
+export interface ScopeMeta {
+  roomType: string;
+  currentState: string;
+  floorSqft: number;
+  currentStateSummary: string;
+  remainingSummary: string;
+  assumptions: string[];
+  confidence: number;
+  confidenceBand: string;
+  source: "ai" | "template";
+}
+
 export interface Estimate {
   id: string;
   jobId: string;
@@ -78,6 +91,10 @@ export interface Estimate {
   tiers: EstimateTier[];
   selectedTier: Tier;
   totalCents: number;
+  /** Regional factor used to price this estimate, so a line-item edit re-derives exactly. */
+  regionalFactor: number;
+  /** Present when this estimate came from a photo scope; powers the review UI + proposal copy. */
+  scopeMeta: ScopeMeta | null;
   createdAt: string;
 }
 

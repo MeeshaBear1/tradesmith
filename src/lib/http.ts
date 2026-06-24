@@ -13,3 +13,9 @@ export const badRequest = (error = "bad_request") => NextResponse.json({ error }
 export const unauthorized = () => NextResponse.json({ error: "unauthorized" }, { status: 401 });
 export const forbidden = (error = "forbidden") => NextResponse.json({ error }, { status: 403 });
 export const notFoundJson = (error = "not_found") => NextResponse.json({ error }, { status: 404 });
+export const conflict = (error = "conflict") => NextResponse.json({ error }, { status: 409 });
+export const tooManyRequests = (retryAfterSec = 60) =>
+  NextResponse.json(
+    { error: "rate_limited", retryAfterSec },
+    { status: 429, headers: { "Retry-After": String(retryAfterSec) } },
+  );

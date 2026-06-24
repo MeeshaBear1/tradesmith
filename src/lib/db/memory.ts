@@ -166,7 +166,14 @@ class MemoryStore implements Store {
   async createEstimate(input: NewEstimate): Promise<Estimate> {
     const version =
       [...this.estimates.values()].filter((e) => e.jobId === input.jobId).length + 1;
-    const e: Estimate = { id: nanoid(), version, createdAt: now(), ...input };
+    const e: Estimate = {
+      id: nanoid(),
+      version,
+      createdAt: now(),
+      ...input,
+      regionalFactor: input.regionalFactor ?? 1,
+      scopeMeta: input.scopeMeta ?? null,
+    };
     this.estimates.set(e.id, e);
     return e;
   }
@@ -186,6 +193,19 @@ class MemoryStore implements Store {
       e.selectedTier = tier;
       e.totalCents = e.tiers.find((t) => t.tier === tier)?.totalCents ?? e.totalCents;
     }
+  }
+  async updateEstimateTiers(
+    estimateId: string,
+    tiers: Estimate["tiers"],
+    selectedTier: Tier,
+    totalCents: number,
+  ) {
+    const e = this.estimates.get(estimateId);
+    if (!e) return null;
+    e.tiers = tiers;
+    e.selectedTier = selectedTier;
+    e.totalCents = totalCents;
+    return e;
   }
 
   async createProposal(input: NewProposal): Promise<Proposal> {

@@ -82,6 +82,8 @@ const toEstimate = (r: any): Estimate => ({
   tiers: r.tiers,
   selectedTier: r.selected_tier,
   totalCents: r.total_cents,
+  regionalFactor: r.regional_factor ?? 1,
+  scopeMeta: r.scope_meta ?? null,
   createdAt: r.created_at,
 });
 const toProposal = (r: any): Proposal => ({
@@ -314,6 +316,8 @@ export class SupabaseStore implements Store {
           tiers: input.tiers,
           selected_tier: input.selectedTier,
           total_cents: input.totalCents,
+          regional_factor: input.regionalFactor ?? 1,
+          scope_meta: input.scopeMeta ?? null,
         })
         .select("*")
         .single();
@@ -340,6 +344,21 @@ export class SupabaseStore implements Store {
     const est = await this.getEstimate(estimateId);
     const total = est?.tiers.find((t) => t.tier === tier)?.totalCents ?? est?.totalCents ?? 0;
     await this.db.from("estimates").update({ selected_tier: tier, total_cents: total }).eq("id", estimateId);
+  }
+  async updateEstimateTiers(
+    estimateId: string,
+    tiers: Estimate["tiers"],
+    selectedTier: Tier,
+    totalCents: number,
+  ) {
+    const { data, error } = await this.db
+      .from("estimates")
+      .update({ tiers, selected_tier: selectedTier, total_cents: totalCents })
+      .eq("id", estimateId)
+      .select("*")
+      .maybeSingle();
+    if (error) throw error;
+    return one(data, toEstimate);
   }
 
   async createProposal(input: NewProposal): Promise<Proposal> {

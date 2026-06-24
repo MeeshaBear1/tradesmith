@@ -5,6 +5,7 @@ import { getStore } from "@/lib/db/store";
 import { StatusBadge } from "@/components/badges";
 import { JobActions } from "@/components/jobs/JobActions";
 import { MaterialsList } from "@/components/jobs/MaterialsList";
+import { EstimateEditor } from "@/components/estimate/EstimateEditor";
 import { QrCode } from "@/components/share/QrCode";
 import { env } from "@/config/env";
 import { formatCents } from "@/lib/money";
@@ -46,6 +47,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
         />
       </div>
 
+      <div className="mt-3">
+        <Link href={`/jobs/${job.id}/scope`} className="btn btn-ghost">
+          📷 Quote from a photo
+        </Link>
+      </div>
+
       <div className="mt-6 grid gap-4">
         {job.vertical === "roofing" && (
           <Section title="Takeoff">
@@ -64,14 +71,58 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
 
         <Section title="Estimate">
           {estimate && selectedTier ? (
-            <div className="text-sm">
-              <Detail k="Trade" v={job.vertical} />
-              <Detail k="Selected" v={`${selectedTier.label} package`} />
-              <Detail k="Total" v={formatCents(selectedTier.totalCents)} />
-              <Detail k="Size" v={`${selectedTier.displayQty} ${selectedTier.displayUnit}`} />
+            <div className="space-y-4">
+              <div className="text-sm">
+                <Detail k="Trade" v={job.vertical} />
+                <Detail k="Selected" v={`${selectedTier.label} package`} />
+                <Detail k="Total" v={formatCents(selectedTier.totalCents)} />
+                <Detail k="Size" v={`${selectedTier.displayQty} ${selectedTier.displayUnit}`} />
+              </div>
+
+              {estimate.scopeMeta && (
+                <div className="rounded-lg border border-[var(--line)] bg-[var(--surface-sunken)] p-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold capitalize">
+                      {estimate.scopeMeta.roomType} · {estimate.scopeMeta.currentState}
+                    </span>
+                    <span
+                      className="badge"
+                      style={{ background: "var(--brand-soft)", color: "var(--brand-strong)" }}
+                    >
+                      {estimate.scopeMeta.source === "ai" ? "AI scope" : "Template scope"} ·{" "}
+                      {estimate.scopeMeta.confidenceBand}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[var(--muted)]">{estimate.scopeMeta.remainingSummary}</p>
+                  {estimate.scopeMeta.assumptions.length > 0 && (
+                    <ul className="mt-2 list-disc pl-4 text-xs text-[var(--muted)]">
+                      {estimate.scopeMeta.assumptions.map((a, i) => (
+                        <li key={i}>{a}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              <div>
+                <div className="label mb-2">Review &amp; edit lines</div>
+                <EstimateEditor
+                  estimateId={estimate.id}
+                  tiers={estimate.tiers}
+                  selectedTier={estimate.selectedTier}
+                  regionalFactor={estimate.regionalFactor}
+                  markupRates={selectedTier.markup.map((m) => ({ key: m.key, label: m.label, rate: m.rate }))}
+                  locked={proposal?.status === "accepted"}
+                />
+              </div>
             </div>
           ) : (
-            <Empty>No estimate yet.</Empty>
+            <div className="space-y-3">
+              <Empty>No estimate yet.</Empty>
+              <Link href={`/jobs/${job.id}/scope`} className="btn btn-ghost">
+                📷 Quote from a photo
+              </Link>
+            </div>
           )}
         </Section>
 

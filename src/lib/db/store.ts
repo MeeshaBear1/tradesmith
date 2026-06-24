@@ -11,7 +11,7 @@ import type {
   Proposal,
   Takeoff,
 } from "@/lib/db/types";
-import type { Tier } from "@/lib/takeoff/types";
+import type { EstimateTier, Tier } from "@/lib/takeoff/types";
 import type { RateConfig } from "@/lib/verticals/types";
 import type { RenderStatus } from "@/lib/db/types";
 
@@ -42,7 +42,8 @@ export type NewTakeoff = Pick<
 export type NewEstimate = Pick<
   Estimate,
   "jobId" | "contractorId" | "vertical" | "takeoffId" | "inputs" | "tiers" | "selectedTier" | "totalCents"
->;
+> &
+  Partial<Pick<Estimate, "regionalFactor" | "scopeMeta">>;
 export type NewProposal = Pick<Proposal, "jobId" | "contractorId" | "estimateId" | "scopeCopy">;
 export type NewInvoice = Pick<Invoice, "jobId" | "contractorId" | "proposalId" | "amountCents" | "depositCents" | "type">;
 export type NewPayment = Pick<
@@ -77,6 +78,13 @@ export interface Store {
   getEstimate(id: string): Promise<Estimate | null>;
   getLatestEstimate(jobId: string): Promise<Estimate | null>;
   setSelectedTier(estimateId: string, tier: Tier): Promise<void>;
+  /** Replace an estimate's tiers after a line-item edit; total is re-derived server-side. */
+  updateEstimateTiers(
+    estimateId: string,
+    tiers: EstimateTier[],
+    selectedTier: Tier,
+    totalCents: number,
+  ): Promise<Estimate | null>;
 
   createProposal(input: NewProposal): Promise<Proposal>;
   getProposalByToken(token: string): Promise<Proposal | null>;

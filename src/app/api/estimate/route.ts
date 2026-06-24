@@ -76,6 +76,8 @@ export async function POST(req: Request) {
     tiers,
     selectedTier,
     totalCents,
+    regionalFactor,
+    scopeMeta: null,
   });
   await store.updateJobStatus(job.id, "estimated");
 
