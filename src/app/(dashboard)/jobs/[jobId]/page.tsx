@@ -7,6 +7,7 @@ import { JobActions } from "@/components/jobs/JobActions";
 import { MaterialsList } from "@/components/jobs/MaterialsList";
 import { EstimateEditor } from "@/components/estimate/EstimateEditor";
 import { BillingPanel } from "@/components/jobs/BillingPanel";
+import { ScheduleEditor } from "@/components/jobs/ScheduleEditor";
 import { QrCode } from "@/components/share/QrCode";
 import { env } from "@/config/env";
 import { formatCents } from "@/lib/money";
@@ -57,6 +58,10 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
       </div>
 
       <div className="mt-6 grid gap-4">
+        <Section title="Schedule">
+          <ScheduleEditor jobId={job.id} startDate={job.startDate} endDate={job.endDate} />
+        </Section>
+
         {job.vertical === "roofing" && (
           <Section title="Takeoff">
             {takeoff ? (

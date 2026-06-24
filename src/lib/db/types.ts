@@ -38,6 +38,9 @@ export interface Job {
   lat: number | null;
   lng: number | null;
   status: JobStatus;
+  /** Optional scheduled start/end dates (YYYY-MM-DD) for crew planning. */
+  startDate: string | null;
+  endDate: string | null;
   createdAt: string;
 }
 

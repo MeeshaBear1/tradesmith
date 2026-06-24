@@ -59,6 +59,8 @@ class MemoryStore implements Store {
         lat: null,
         lng: null,
         status: seed.status,
+        startDate: null,
+        endDate: null,
         createdAt: new Date(Date.now() - offset * 86_400_000).toISOString(),
       });
     }
@@ -101,7 +103,7 @@ class MemoryStore implements Store {
   }
 
   async createJob(input: NewJob): Promise<Job> {
-    const job: Job = { id: nanoid(), status: "new", createdAt: now(), ...input };
+    const job: Job = { id: nanoid(), status: "new", createdAt: now(), startDate: null, endDate: null, ...input };
     this.jobs.set(job.id, job);
     return job;
   }

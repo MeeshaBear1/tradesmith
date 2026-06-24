@@ -18,10 +18,13 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ jobId: string
   if (!(await ownedJob(store, contractorId, jobId))) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const body = await readJson<Record<string, unknown>>(req);
+  const isDate = (s: unknown): s is string => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
   const fields: JobUpdate = {};
   if (typeof body?.homeownerName === "string" && body.homeownerName.trim()) fields.homeownerName = body.homeownerName.trim();
   if (typeof body?.homeownerEmail === "string") fields.homeownerEmail = body.homeownerEmail.trim() || null;
   if (typeof body?.address === "string" && body.address.trim()) fields.address = body.address.trim();
+  if (body?.startDate !== undefined) fields.startDate = isDate(body.startDate) ? body.startDate : null;
+  if (body?.endDate !== undefined) fields.endDate = isDate(body.endDate) ? body.endDate : null;
   if (Object.keys(fields).length === 0) return badRequest("no_fields");
 
   const job = await store.updateJob(jobId, fields);

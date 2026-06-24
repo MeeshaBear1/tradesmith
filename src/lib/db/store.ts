@@ -34,7 +34,9 @@ export type NewJob = Pick<
   Job,
   "contractorId" | "vertical" | "homeownerName" | "homeownerEmail" | "address" | "lat" | "lng"
 >;
-export type JobUpdate = Partial<Pick<Job, "homeownerName" | "homeownerEmail" | "address">>;
+export type JobUpdate = Partial<
+  Pick<Job, "homeownerName" | "homeownerEmail" | "address" | "startDate" | "endDate">
+>;
 export type NewTakeoff = Pick<
   Takeoff,
   "jobId" | "contractorId" | "vertical" | "source" | "satelliteImageUrl" | "measurement" | "confidence"

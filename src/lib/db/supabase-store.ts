@@ -54,6 +54,8 @@ const toJob = (r: any): Job => ({
   lat: r.lat,
   lng: r.lng,
   status: r.status,
+  startDate: r.start_date ?? null,
+  endDate: r.end_date ?? null,
   createdAt: r.created_at,
 });
 const toTakeoff = (r: any): Takeoff => ({
@@ -252,6 +254,8 @@ export class SupabaseStore implements Store {
     if (fields.homeownerName !== undefined) patch.homeowner_name = fields.homeownerName;
     if (fields.homeownerEmail !== undefined) patch.homeowner_email = fields.homeownerEmail;
     if (fields.address !== undefined) patch.address = fields.address;
+    if (fields.startDate !== undefined) patch.start_date = fields.startDate;
+    if (fields.endDate !== undefined) patch.end_date = fields.endDate;
     const { data, error } = await this.db.from("jobs").update(patch).eq("id", id).select("*").maybeSingle();
     if (error) throw error;
     return one(data, toJob);
