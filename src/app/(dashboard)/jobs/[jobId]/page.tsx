@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/badges";
 import { JobActions } from "@/components/jobs/JobActions";
 import { MaterialsList } from "@/components/jobs/MaterialsList";
 import { EstimateEditor } from "@/components/estimate/EstimateEditor";
+import { BillingPanel } from "@/components/jobs/BillingPanel";
 import { QrCode } from "@/components/share/QrCode";
 import { env } from "@/config/env";
 import { formatCents } from "@/lib/money";
@@ -21,7 +22,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
   const estimate = await store.getLatestEstimate(job.id);
   const proposal = await store.getProposalForJob(job.id);
   const invoice = proposal ? await store.getInvoiceForProposal(proposal.id) : null;
+  const invoices = proposal ? await store.listInvoicesForJob(job.id) : [];
   const selectedTier = estimate?.tiers.find((t) => t.tier === estimate.selectedTier);
+  const contractTotalCents = estimate?.totalCents ?? 0;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -145,7 +148,18 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
               )}
               {proposal.status === "accepted" && (
                 <div className="rounded-lg p-3" style={{ background: "var(--ok-soft)", color: "var(--ok)" }}>
-                  Accepted{proposal.signatureName ? ` by ${proposal.signatureName}` : ""}.
+                  Accepted{proposal.signatureName ? ` by ${proposal.signatureName}` : ""}
+                  {proposal.acceptedAt ? ` · ${new Date(proposal.acceptedAt).toLocaleDateString()}` : ""}.
+                  {proposal.signatureDataUrl && (
+                    <div className="mt-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={proposal.signatureDataUrl}
+                        alt="Signature"
+                        className="h-16 rounded border border-[var(--line)] bg-white p-1"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
               <div className="flex flex-wrap gap-2">
@@ -172,6 +186,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
             <Empty>No proposal yet.</Empty>
           )}
         </Section>
+
+        {proposal?.status === "accepted" && (
+          <Section title="Billing & balance">
+            <BillingPanel jobId={job.id} contractTotalCents={contractTotalCents} invoices={invoices} />
+          </Section>
+        )}
       </div>
     </div>
   );

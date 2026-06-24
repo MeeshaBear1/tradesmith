@@ -3,12 +3,20 @@ import { getStore } from "@/lib/db/store";
 import { badRequest, notFoundJson, readJson } from "@/lib/http";
 import { depositCents, deriveAmountCents, resolveChosenTier } from "@/lib/proposals/deposit";
 
+/** A drawn-signature data URL, validated + size-capped (~300KB) before it's stored. */
+function sanitizeSignature(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  if (!/^data:image\/(png|jpeg|webp);base64,/.test(v)) return null;
+  return v.length > 400_000 ? null : v;
+}
+
 /** Public (no auth) — homeowner accepts + types their name, which mints a deposit invoice. */
 export async function POST(req: Request, ctx: { params: Promise<{ token: string }> }) {
   const { token } = await ctx.params;
-  const body = await readJson<{ signatureName?: string; selectedTier?: string }>(req);
+  const body = await readJson<{ signatureName?: string; selectedTier?: string; signatureDataUrl?: string }>(req);
   const signature = (body?.signatureName ?? "").trim();
   if (!signature) return badRequest("signature_required");
+  const signatureDataUrl = sanitizeSignature(body?.signatureDataUrl);
 
   const store = await getStore();
   const existing = await store.getProposalByToken(token);
@@ -22,7 +30,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
     if (inv) return NextResponse.json({ invoiceToken: inv.publicToken });
   }
 
-  const proposal = await store.acceptProposal(token, signature);
+  const proposal = await store.acceptProposal(token, signature, signatureDataUrl);
   if (!proposal) return notFoundJson();
 
   const estimate = await store.getEstimate(proposal.estimateId);

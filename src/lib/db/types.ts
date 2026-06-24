@@ -107,6 +107,8 @@ export interface Proposal {
   status: ProposalStatus;
   scopeCopy: ScopeCopy | null;
   signatureName: string | null;
+  /** Data URL (PNG) of the drawn signature, captured at acceptance. */
+  signatureDataUrl: string | null;
   acceptedAt: string | null;
   /** First time the homeowner opened the proposal link (open-tracking). */
   viewedAt: string | null;

@@ -214,6 +214,7 @@ class MemoryStore implements Store {
       publicToken: nanoid(),
       status: "sent",
       signatureName: null,
+      signatureDataUrl: null,
       acceptedAt: null,
       viewedAt: null,
       createdAt: now(),
@@ -221,6 +222,11 @@ class MemoryStore implements Store {
     };
     this.proposals.set(p.id, p);
     return p;
+  }
+  async listProposals(contractorId: string) {
+    return [...this.proposals.values()]
+      .filter((p) => p.contractorId === contractorId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
   async getProposalByToken(token: string) {
     return [...this.proposals.values()].find((p) => p.publicToken === token) ?? null;
@@ -242,13 +248,14 @@ class MemoryStore implements Store {
       p.viewedAt = now();
     }
   }
-  async acceptProposal(token: string, signatureName: string) {
+  async acceptProposal(token: string, signatureName: string, signatureDataUrl?: string | null) {
     const p = await this.getProposalByToken(token);
     if (!p) return null;
     // Idempotent: never overwrite an existing signature/timestamp.
     if (p.status === "accepted") return p;
     p.status = "accepted";
     p.signatureName = signatureName;
+    p.signatureDataUrl = signatureDataUrl ?? null;
     p.acceptedAt = now();
     return p;
   }
@@ -271,6 +278,11 @@ class MemoryStore implements Store {
   }
   async getInvoiceForProposal(proposalId: string) {
     return [...this.invoices.values()].find((i) => i.proposalId === proposalId) ?? null;
+  }
+  async listInvoicesForJob(jobId: string) {
+    return [...this.invoices.values()]
+      .filter((i) => i.jobId === jobId)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
   async setInvoicePaymentIntent(id: string, paymentIntentId: string) {
     const inv = this.invoices.get(id);

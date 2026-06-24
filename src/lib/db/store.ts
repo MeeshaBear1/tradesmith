@@ -90,12 +90,14 @@ export interface Store {
   getProposalByToken(token: string): Promise<Proposal | null>;
   getProposalById(id: string): Promise<Proposal | null>;
   getProposalForJob(jobId: string): Promise<Proposal | null>;
+  listProposals(contractorId: string): Promise<Proposal[]>;
   markProposalViewed(token: string): Promise<void>;
-  acceptProposal(token: string, signatureName: string): Promise<Proposal | null>;
+  acceptProposal(token: string, signatureName: string, signatureDataUrl?: string | null): Promise<Proposal | null>;
 
   createInvoice(input: NewInvoice): Promise<Invoice>;
   getInvoiceByToken(token: string): Promise<Invoice | null>;
   getInvoiceForProposal(proposalId: string): Promise<Invoice | null>;
+  listInvoicesForJob(jobId: string): Promise<Invoice[]>;
   setInvoicePaymentIntent(id: string, paymentIntentId: string): Promise<void>;
   markInvoicePaid(id: string): Promise<void>;
 

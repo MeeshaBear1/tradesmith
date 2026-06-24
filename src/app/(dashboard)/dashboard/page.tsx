@@ -4,6 +4,7 @@ import { getStore } from "@/lib/db/store";
 import { getVertical } from "@/lib/verticals/registry";
 import { StatusBadge } from "@/components/badges";
 import { computeDashboardMetrics } from "@/lib/metrics";
+import { followupsFor } from "@/lib/reminders";
 import type { JobStatus } from "@/lib/db/types";
 import { formatCents } from "@/lib/money";
 
@@ -21,6 +22,10 @@ export default async function DashboardPage() {
   const estimates = await Promise.all(jobs.map((j) => store.getLatestEstimate(j.id)));
   const rows = jobs.map((j, i) => ({ status: j.status, estTotalCents: estimates[i]?.totalCents ?? null }));
   const m = computeDashboardMetrics(rows);
+
+  const proposals = await store.listProposals(contractor.id);
+  const followups = followupsFor(proposals, Date.now());
+  const jobById = new Map(jobs.map((j) => [j.id, j]));
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -44,6 +49,32 @@ export default async function DashboardPage() {
       </div>
 
       {m.totalJobs > 0 && <StageFunnel byStage={m.byStage} total={m.totalJobs} />}
+
+      {followups.length > 0 && (
+        <div className="card mt-3 p-4">
+          <div className="label mb-3">Needs follow-up · {followups.length}</div>
+          <div className="divide-y divide-[var(--line)]">
+            {followups.slice(0, 6).map((f) => {
+              const job = jobById.get(f.jobId);
+              return (
+                <Link
+                  key={f.proposalId}
+                  href={`/jobs/${f.jobId}`}
+                  className="flex items-center justify-between gap-3 py-2 hover:opacity-80"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{job?.homeownerName ?? "Job"}</div>
+                    <div className="truncate text-xs text-[var(--muted)]">{f.label}</div>
+                  </div>
+                  <span className="badge shrink-0" style={{ background: "var(--warn-soft)", color: "var(--warn)" }}>
+                    {f.reason === "unopened" ? "Not opened" : "No signature"}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="mt-7 flex items-center justify-between">
         <h2 className="font-semibold">Recent jobs</h2>

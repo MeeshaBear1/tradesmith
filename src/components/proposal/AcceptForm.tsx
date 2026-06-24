@@ -20,6 +20,7 @@ export function AcceptForm({
 }) {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [signature, setSignature] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +48,7 @@ export function AcceptForm({
       const res = await fetch(`/api/proposal/${token}/accept`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ signatureName: name, selectedTier }),
+        body: JSON.stringify({ signatureName: name, selectedTier, signatureDataUrl: signature }),
       });
       if (!res.ok) throw new Error("Could not accept");
       const { invoiceToken } = (await res.json()) as { invoiceToken: string };
@@ -65,7 +66,7 @@ export function AcceptForm({
         Sign below and type your full name to e-sign. You&apos;ll then place a deposit to lock in your spot.
       </p>
       <div className="mt-4">
-        <SignaturePad onChange={() => {}} />
+        <SignaturePad onChange={setSignature} />
       </div>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <input

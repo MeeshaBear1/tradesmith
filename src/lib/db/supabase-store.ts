@@ -95,6 +95,7 @@ const toProposal = (r: any): Proposal => ({
   status: r.status,
   scopeCopy: r.scope_copy,
   signatureName: r.signature_name,
+  signatureDataUrl: r.signature_data_url ?? null,
   acceptedAt: r.accepted_at,
   viewedAt: r.viewed_at ?? null,
   createdAt: r.created_at,
@@ -396,6 +397,14 @@ export class SupabaseStore implements Store {
       .maybeSingle();
     return one(data, toProposal);
   }
+  async listProposals(contractorId: string) {
+    const { data } = await this.db
+      .from("proposals")
+      .select("*")
+      .eq("contractor_id", contractorId)
+      .order("created_at", { ascending: false });
+    return (data ?? []).map(toProposal);
+  }
   async markProposalViewed(token: string) {
     // First open only: flip sent -> viewed and stamp the time.
     await this.db
@@ -404,11 +413,16 @@ export class SupabaseStore implements Store {
       .eq("public_token", token)
       .eq("status", "sent");
   }
-  async acceptProposal(token: string, signatureName: string) {
+  async acceptProposal(token: string, signatureName: string, signatureDataUrl?: string | null) {
     // Idempotent: only stamp a signature when not already accepted.
     const { data, error } = await this.db
       .from("proposals")
-      .update({ status: "accepted", signature_name: signatureName, accepted_at: new Date().toISOString() })
+      .update({
+        status: "accepted",
+        signature_name: signatureName,
+        signature_data_url: signatureDataUrl ?? null,
+        accepted_at: new Date().toISOString(),
+      })
       .eq("public_token", token)
       .neq("status", "accepted")
       .select("*")
@@ -451,6 +465,14 @@ export class SupabaseStore implements Store {
       .limit(1)
       .maybeSingle();
     return one(data, toInvoice);
+  }
+  async listInvoicesForJob(jobId: string) {
+    const { data } = await this.db
+      .from("invoices")
+      .select("*")
+      .eq("job_id", jobId)
+      .order("created_at", { ascending: true });
+    return (data ?? []).map(toInvoice);
   }
   async setInvoicePaymentIntent(id: string, paymentIntentId: string) {
     await this.db.from("invoices").update({ stripe_payment_intent_id: paymentIntentId }).eq("id", id);
